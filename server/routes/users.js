@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import SibApiV3Sdk from 'sib-api-v3-sdk';
-import SibApiV3Sdk from '@getbrevo/brevo';
 import pool from '../db.js';
 
 console.log("=== KASCUAN API START ===");

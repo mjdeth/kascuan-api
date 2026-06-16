@@ -8,14 +8,13 @@ import pool from '../db.js';
 const router = express.Router();
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_APP_PASSWORD
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_APP_PASSWORD
+  }
 });
 
 transporter.verify(function (error, success) {
@@ -59,10 +58,7 @@ router.post('/register', async (req, res) => {
 
         await client.query('COMMIT');
 
-        /*const verificationUrl = `http://localhost:5173/verify-email?token=${verificationToken}`;*/
-        /*console.log("SKIP EMAIL", verificationUrl);*/
-
-        /*
+        const verificationUrl = `http://localhost:5173/verify-email?token=${verificationToken}`;
         await transporter.sendMail({
             from: `"KasCuan" <${process.env.EMAIL_USER}>`,
             to: email,
@@ -72,7 +68,6 @@ router.post('/register', async (req, res) => {
                    <a href="${verificationUrl}" style="padding:10px 20px; background-color:#006c49; color:white; text-decoration:none; border-radius:8px;">Verifikasi Email Saya</a>
                    <p>Jika Anda tidak mendaftar, abaikan email ini.</p>`
         });
-        */
 
         res.status(201).json({
             message: 'Registrasi berhasil! Silakan cek email Anda untuk verifikasi sebelum masuk.'
@@ -115,8 +110,6 @@ router.post('/request-reset-password', async (req, res) => {
         // Kirim Email
         const resetUrl = `http://localhost:5173/reset-password?token=${resetToken}`;
         console.log('Skip email verification sementara');
-
-        /*
         await transporter.sendMail({
             from: `"KasCuan" <${process.env.EMAIL_USER}>`,
             to: email,
@@ -125,7 +118,6 @@ router.post('/request-reset-password', async (req, res) => {
                    <p>Kami menerima permintaan untuk mengubah kata sandi Anda. Klik tombol di bawah ini:</p>
                    <a href="${resetUrl}">Ubah Kata Sandi</a>`
         });
-        */
 
         res.status(200).json({ message: 'Tautan reset sandi telah dikirim ke email Anda.' });
     } catch (err) {
@@ -197,6 +189,24 @@ router.post('/login', async (req, res) => {
         console.error(err.message);
         res.status(500).json({ error: 'Server error saat login' });
     }
+});
+
+router.get('/test-email', async (req, res) => {
+  try {
+    await transporter.sendMail({
+      from: `"KasCuan" <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_USER,
+      subject: 'Tes Email KasCuan',
+      text: 'Jika email ini masuk berarti SMTP berhasil.'
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: err.message
+    });
+  }
 });
 
 export default router;

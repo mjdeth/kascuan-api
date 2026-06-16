@@ -23,23 +23,6 @@ console.log(
   process.env.EMAIL_APP_PASSWORD ? "YA" : "TIDAK"
 );
 
-transporter.verify((err, success) => {
-  if (err) {
-    console.error("VERIFY ERROR:", err);
-  } else {
-    console.log("SMTP READY");
-  }
-});
-
-/*
-transporter.verify(function (error, success) {
-    if (error) {
-        console.log("Koneksi error:", error);
-    } else {
-        console.log("Server siap mengirim pesan!");
-    }
-});
-*/
 
 router.post('/register', async (req, res) => {
     const client = await pool.connect();

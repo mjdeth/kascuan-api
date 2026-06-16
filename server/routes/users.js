@@ -5,6 +5,9 @@ import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import pool from '../db.js';
 
+console.log("=== KASCUAN API START ===");
+console.log("COMMIT DEBUG SMTP");
+
 const router = express.Router();
 
 const transporter = nodemailer.createTransport({
@@ -223,6 +226,13 @@ router.get('/test-email', async (req, res) => {
       error: err.message
     });
   }
+});
+
+router.get('/smtp-debug', (req, res) => {
+  res.json({
+    email: process.env.EMAIL_USER,
+    hasPassword: !!process.env.EMAIL_APP_PASSWORD
+  });
 });
 
 export default router;

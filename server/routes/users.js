@@ -2,7 +2,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import nodemailer from 'nodemailer';
+import SibApiV3Sdk from 'sib-api-v3-sdk';
 import pool from '../db.js';
 
 console.log("=== KASCUAN API START ===");
@@ -10,15 +10,12 @@ console.log("COMMIT DEBUG SMTP");
 
 const router = express.Router();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
-});
+const client = SibApiV3Sdk.ApiClient.instance;
+
+client.authentications['api-key'].apiKey =
+  process.env.BREVO_API_KEY;
+
+const emailApi = new SibApiV3Sdk.TransactionalEmailsApi();
 
 console.log("EMAIL_USER =", process.env.EMAIL_USER);
 console.log(
@@ -78,14 +75,17 @@ router.post('/register', async (req, res) => {
         await client.query('COMMIT');
 
         const verificationUrl = `http://localhost:5173/verify-email?token=${verificationToken}`;
-        await transporter.sendMail({
-            from: `"KasCuan" <${process.env.EMAIL_USER}>`,
-            to: email,
+        await emailApi.sendTransacEmail({
+            sender: {
+            email: 'muhjalalludin01@gmail.com',
+            name: 'KasCuan'
+            },
+            to: [{ email }],
             subject: 'Verifikasi Akun KasCuan Anda',
-            html: `<h3>Selamat datang di EquiCount!</h3>
-                   <p>Halo ${full_name}, silakan klik tautan di bawah ini untuk memverifikasi akun Anda:</p>
-                   <a href="${verificationUrl}" style="padding:10px 20px; background-color:#006c49; color:white; text-decoration:none; border-radius:8px;">Verifikasi Email Saya</a>
-                   <p>Jika Anda tidak mendaftar, abaikan email ini.</p>`
+            htmlContent: `<h3>Selamat datang di EquiCount!</h3>
+                      <p>Halo ${full_name}, silakan klik tautan di bawah ini untuk memverifikasi akun Anda:</p>
+                      <a href="${verificationUrl}" style="padding:10px 20px; background-color:#006c49; color:white; text-decoration:none; border-radius:8px;">Verifikasi Email Saya</a>
+                      <p>Jika Anda tidak mendaftar, abaikan email ini.</p>`
         });
 
         res.status(201).json({
@@ -128,14 +128,16 @@ router.post('/request-reset-password', async (req, res) => {
 
         // Kirim Email
         const resetUrl = `http://localhost:5173/reset-password?token=${resetToken}`;
-        console.log('Skip email verification sementara');
-        await transporter.sendMail({
-            from: `"KasCuan" <${process.env.EMAIL_USER}>`,
-            to: email,
+        await emailApi.sendTransacEmail({
+            sender: {
+            email: 'muhjalalludin01@gmail.com',
+            name: 'KasCuan'
+            },
+            to: [{ email }],
             subject: 'Permintaan Perubahan Kata Sandi',
-            html: `<p>Halo ${result.rows[0].full_name},</p>
-                   <p>Kami menerima permintaan untuk mengubah kata sandi Anda. Klik tombol di bawah ini:</p>
-                   <a href="${resetUrl}">Ubah Kata Sandi</a>`
+            htmlContent: `<p>Halo ${result.rows[0].full_name},</p>
+                          <p>Kami menerima permintaan untuk mengubah kata sandi Anda. Klik tombol di bawah ini:</p>
+                          <a href="${resetUrl}">Ubah Kata Sandi</a>`
         });
 
         res.status(200).json({ message: 'Tautan reset sandi telah dikirim ke email Anda.' });
@@ -212,12 +214,17 @@ router.post('/login', async (req, res) => {
 
 router.get('/test-email', async (req, res) => {
   try {
-    await transporter.sendMail({
-      from: `"KasCuan" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER,
+    await emailApi.sendTransacEmail({
+        sender: {
+        email: 'muhjalalludin01@gmail.com',
+        name: 'KasCuan'
+      },
+      to: [{
+      email: 'muhjalalludin01@gmail.com'
+      }],
       subject: 'Tes Email KasCuan',
-      text: 'Jika email ini masuk berarti SMTP berhasil.'
-    });
+      htmlContent: '<p>Jika email ini masuk berarti Brevo API berhasil.</p>'
+      });
 
     res.json({ success: true });
   } catch (err) {

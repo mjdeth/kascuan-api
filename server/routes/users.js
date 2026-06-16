@@ -17,6 +17,21 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+console.log("EMAIL_USER =", process.env.EMAIL_USER);
+console.log(
+  "EMAIL_APP_PASSWORD ada?",
+  process.env.EMAIL_APP_PASSWORD ? "YA" : "TIDAK"
+);
+
+transporter.verify((err, success) => {
+  if (err) {
+    console.error("VERIFY ERROR:", err);
+  } else {
+    console.log("SMTP READY");
+  }
+});
+
+/*
 transporter.verify(function (error, success) {
     if (error) {
         console.log("Koneksi error:", error);
@@ -24,6 +39,7 @@ transporter.verify(function (error, success) {
         console.log("Server siap mengirim pesan!");
     }
 });
+*/
 
 router.post('/register', async (req, res) => {
     const client = await pool.connect();

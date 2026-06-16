@@ -247,21 +247,12 @@ router.get('/dns-test', async (req, res) => {
 });
 
 router.get('/smtp-debug-full', async (req, res) => {
-  try {
-    await transporter.verify();
-
-    res.json({
-      success: true,
-      message: 'SMTP READY'
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      code: err.code,
-      command: err.command,
-      message: err.message
-    });
-  }
+  res.json({
+    SMTP_HOST: process.env.SMTP_HOST,
+    SMTP_PORT: process.env.SMTP_PORT,
+    SMTP_USER: process.env.SMTP_USER,
+    hasSMTPPass: !!process.env.SMTP_PASS
+  });
 });
 
 router.get('/smtp-brevo-test', async (req, res) => {

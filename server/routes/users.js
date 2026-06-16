@@ -15,7 +15,10 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_APP_PASSWORD
-  }
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000
 });
 
 console.log("EMAIL_USER =", process.env.EMAIL_USER);
@@ -241,6 +244,24 @@ router.get('/dns-test', async (req, res) => {
     res.json(result);
   } catch (err) {
     res.json({ error: err.message });
+  }
+});
+
+router.get('/smtp-debug-full', async (req, res) => {
+  try {
+    await transporter.verify();
+
+    res.json({
+      success: true,
+      message: 'SMTP READY'
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      code: err.code,
+      command: err.command,
+      message: err.message
+    });
   }
 });
 

@@ -11,9 +11,7 @@ console.log("COMMIT DEBUG SMTP");
 const router = express.Router();
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_APP_PASSWORD
@@ -233,6 +231,17 @@ router.get('/smtp-debug', (req, res) => {
     email: process.env.EMAIL_USER,
     hasPassword: !!process.env.EMAIL_APP_PASSWORD
   });
+});
+
+router.get('/dns-test', async (req, res) => {
+  const dns = await import('dns/promises');
+
+  try {
+    const result = await dns.resolve4('smtp.gmail.com');
+    res.json(result);
+  } catch (err) {
+    res.json({ error: err.message });
+  }
 });
 
 export default router;

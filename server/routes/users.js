@@ -110,6 +110,9 @@ router.post('/request-reset-password', async (req, res) => {
 
         // Kirim Email
         const resetUrl = `http://localhost:5173/reset-password?token=${resetToken}`;
+        console.log('Skip email verification sementara');
+
+        /*
         await transporter.sendMail({
             from: `"KasCuan" <${process.env.EMAIL_USER}>`,
             to: email,
@@ -118,6 +121,7 @@ router.post('/request-reset-password', async (req, res) => {
                    <p>Kami menerima permintaan untuk mengubah kata sandi Anda. Klik tombol di bawah ini:</p>
                    <a href="${resetUrl}">Ubah Kata Sandi</a>`
         });
+        */
 
         res.status(200).json({ message: 'Tautan reset sandi telah dikirim ke email Anda.' });
     } catch (err) {

@@ -11,14 +11,13 @@ console.log("COMMIT DEBUG SMTP");
 const router = express.Router();
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_APP_PASSWORD
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  }
 });
 
 console.log("EMAIL_USER =", process.env.EMAIL_USER);
@@ -261,6 +260,23 @@ router.get('/smtp-debug-full', async (req, res) => {
       code: err.code,
       command: err.command,
       message: err.message
+    });
+  }
+});
+
+router.get('/smtp-brevo-test', async (req, res) => {
+  try {
+    await transporter.verify();
+
+    res.json({
+      success: true,
+      message: 'Brevo SMTP OK'
+    });
+  } catch (err) {
+    res.json({
+      success: false,
+      error: err.message,
+      code: err.code
     });
   }
 });

@@ -10,6 +10,8 @@ console.log("COMMIT DEBUG SMTP");
 
 const router = express.Router();
 
+const FRONTEND_URL = process.env.FRONTEND_URL;
+
 const client = SibApiV3Sdk.ApiClient.instance;
 
 client.authentications['api-key'].apiKey =
@@ -57,7 +59,7 @@ router.post('/register', async (req, res) => {
 
         await client.query('COMMIT');
 
-        const verificationUrl = `http://localhost:5173/verify-email?token=${verificationToken}`;
+        const verificationUrl =`${FRONTEND_URL}/verify-email?token=${verificationToken}`;
         await emailApi.sendTransacEmail({
             sender: {
             email: 'muhjalalludin01@gmail.com',
@@ -110,7 +112,7 @@ router.post('/request-reset-password', async (req, res) => {
         if (result.rows.length === 0) return res.status(404).json({ error: 'Email tidak ditemukan.' });
 
         // Kirim Email
-        const resetUrl = `http://localhost:5173/reset-password?token=${resetToken}`;
+        const resetUrl =`${FRONTEND_URL}/reset-password?token=${resetToken}`;
         await emailApi.sendTransacEmail({
             sender: {
             email: 'muhjalalludin01@gmail.com',

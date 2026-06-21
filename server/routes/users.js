@@ -59,7 +59,7 @@ router.post('/register', async (req, res) => {
 
         await client.query('COMMIT');
 
-        const verificationUrl =`${FRONTEND_URL}/verify-email?token=${verificationToken}`;
+        const verificationUrl =`https://kascuan-api-production.up.railway.app/api/users/verify-email?token=${verificationToken}`;
         await emailApi.sendTransacEmail({
             sender: {
             email: 'muhjalalludin01@gmail.com',
@@ -87,15 +87,35 @@ router.post('/register', async (req, res) => {
 
 router.get('/verify-email', async (req, res) => {
     const { token } = req.query;
+
     try {
         const result = await pool.query(
-            'UPDATE users SET is_verified = TRUE, verification_token = NULL WHERE verification_token = $1 RETURNING id',
+            `UPDATE users
+             SET is_verified = TRUE,
+                 verification_token = NULL
+             WHERE verification_token = $1
+             RETURNING id`,
             [token]
         );
-        if (result.rows.length === 0) return res.status(400).json({ error: 'Token tidak valid atau sudah kedaluwarsa.' });
-        res.status(200).json({ message: 'Email berhasil diverifikasi! Anda sekarang bisa masuk.' });
+
+        if (result.rows.length === 0) {
+            return res.send(`
+                <h2>❌ Link tidak valid atau sudah kadaluarsa</h2>
+            `);
+        }
+
+        return res.send(`
+            <h1>✅ Email Berhasil Diverifikasi</h1>
+            <p>Silakan kembali ke KasCuan dan login.</p>
+            <a href="https://kascuan.vercel.app">
+                Buka KasCuan
+            </a>
+        `);
+
     } catch (err) {
-        res.status(500).json({ error: 'Server error' });
+        return res.send(`
+            <h2>❌ Terjadi kesalahan server</h2>
+        `);
     }
 });
 

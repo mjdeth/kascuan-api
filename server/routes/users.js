@@ -123,6 +123,7 @@ router.post('/request-reset-password', async (req, res) => {
     const { email } = req.body;
     try {
         const resetToken = crypto.randomBytes(32).toString('hex');
+        console.log("RESET TOKEN:", resetToken);
         const expireDate = new Date(Date.now() + 3600000);
         const result = await pool.query(
             'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE email = $3 RETURNING full_name',
@@ -153,6 +154,7 @@ router.post('/request-reset-password', async (req, res) => {
 
 router.post('/reset-password', async (req, res) => {
     const { token, newPassword } = req.body;
+    console.log("TOKEN DARI LINK:", token);
     try {
         // Cek token apakah valid dan belum expired
         const userRes = await pool.query(
